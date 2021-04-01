@@ -90,7 +90,11 @@ program.command('generate:database')
 
 program.command('new <name>')
   .action(async (name) => {
-    const stat = await fs.stat(name);
+    const stat = await fs.stat(name).catch(err => {
+      if (err.code === 'ENOENT')
+        return null;
+      throw err;
+    });
     if (stat) {
       log(chalk.red(`${name} is exited!`));
       return;
@@ -159,8 +163,8 @@ program.command('new <name>')
     delete installedPkg.repository;
     delete installedPkg.bugs;
     delete installedPkg.homepage;
-    delete installedPkg.script.test;
-    delete installedPkg.script.link;
+    delete installedPkg.scripts.test;
+    delete installedPkg.scripts.link;
 
     await fs.writeFile(pkgPath, JSON.stringify(installedPkg, null, 2));
 

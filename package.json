@@ -1,5 +1,5 @@
 {
-  "name": "@sora/cli",
+  "name": "@sora-soft/cli",
   "version": "1.0.0",
   "description": "sora system example",
   "bin": {
@@ -7,7 +7,9 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "rimraf ./dist && tsc"
+    "build": "rimraf ./dist && tsc",
+    "clean": "rimraf ./dist",
+    "prepublishOnly": "rimraf ./dist && tsc"
   },
   "keywords": [
     "sora"
