@@ -1,0 +1,8 @@
+import {Entity, PrimaryGeneratedColumn} from 'typeorm';
+import {BaseModel} from './base/Base';
+
+@Entity()
+export class <%- databaseName %> extends BaseModel {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+}

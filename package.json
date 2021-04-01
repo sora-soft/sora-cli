@@ -1,0 +1,37 @@
+{
+  "name": "@sora/cli",
+  "version": "1.0.0",
+  "description": "sora system example",
+  "bin": {
+    "sora": "./bin/cli.js"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rimraf ./dist && tsc"
+  },
+  "keywords": [
+    "sora"
+  ],
+  "author": "yaya",
+  "license": "WTFPL",
+  "dependencies": {
+    "@angular-devkit/core": "^11.2.6",
+    "art-template": "^4.13.2",
+    "camelcase": "^6.2.0",
+    "chalk": "^2.4.2",
+    "commander": "^7.2.0",
+    "download-git-repo": "^3.0.2",
+    "inquirer": "^8.0.0",
+    "mkdirp": "^0.5.5",
+    "ora": "^5.4.0",
+    "source-map-support": "^0.5.19",
+    "typescript": "^4.2.3"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^7.3.1",
+    "@types/mkdirp": "^1.0.1",
+    "@types/node": "^14.14.37",
+    "rimraf": "^3.0.2",
+    "tslint": "^6.1.3"
+  }
+}

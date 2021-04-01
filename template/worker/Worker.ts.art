@@ -1,0 +1,27 @@
+import {IWorkerOptions, Node, Worker} from '@sora-soft/framework';
+import {<%- workerNameEnum %>} from '<%- workerNameWorkerRelativePath %>';
+
+export interface I<%- upperCamelCaseWorkerName %>WorkerOptions extends IWorkerOptions {
+}
+
+class <%- upperCamelCaseWorkerName %>Worker extends Worker {
+  static register() {
+    Node.registerWorker(WorkerName.<%- upperCamelCaseWorkerName %>, (options: I<%- upperCamelCaseWorkerName %>WorkerOptions) => {
+      return new <%- upperCamelCaseWorkerName %>Worker(<%- workerNameEnum %>.<%- upperCamelCaseWorkerName %>, options);
+    });
+  }
+
+  constructor(name: string, options: I<%- upperCamelCaseWorkerName %>WorkerOptions) {
+    super(name);
+    this.options_ = options;
+  }
+
+  protected async startup() {}
+
+  protected async shutdown() {}
+
+  private options_: I<%- upperCamelCaseWorkerName %>WorkerOptions;
+}
+
+export {<%- upperCamelCaseWorkerName %>Worker}
+

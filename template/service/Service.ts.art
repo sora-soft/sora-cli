@@ -1,0 +1,26 @@
+import {IServiceOptions, Node, Service} from '@sora-soft/framework';
+import {<%- serviceNameEnum %>} from '<%- serviceNameServiceRelativePath %>';
+
+export interface I<%- upperCamelCaseServiceName %>Options extends IServiceOptions {
+}
+
+class <%- upperCamelCaseServiceName %>Service extends Service {
+  static register() {
+    Node.registerService(<%- serviceNameEnum %>.<%- upperCamelCaseServiceName %>, (options: I<%- upperCamelCaseServiceName %>Options) => {
+      return new <%- upperCamelCaseServiceName %>Service(<%- serviceNameEnum %>.<%- upperCamelCaseServiceName %>, options);
+    });
+  }
+
+  constructor(name: string, options: I<%- upperCamelCaseServiceName %>Options) {
+    super(name, options);
+    this.serviceOptions_ = options;
+  }
+
+  protected async startup() {}
+
+  protected async shutdown() {}
+
+  private serviceOptions_: I<%- upperCamelCaseServiceName %>Options;
+}
+
+export {<%- upperCamelCaseServiceName %>Service}
