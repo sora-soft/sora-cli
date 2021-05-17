@@ -6,6 +6,10 @@ import {ScriptFileNode} from './fs/ScriptFileNode';
 import {AST} from './AST';
 import pathModule = require('path');
 const path = pathModule.posix;
+import * as tsutils from 'tsutils/typeguard';
+import * as ts from 'typescript';
+import {DTS} from './DTS';
+import {Morph} from './Morph';
 
 interface IGenerateCommonOptions {
   dryRun?: boolean;
@@ -27,6 +31,8 @@ interface IGenerateDatabaseOptions extends IGenerateCommonOptions {
   name: string;
   component?: string;
 }
+
+// interface IBuildAPIDeclare extends IGenerateCommonOptions {}
 
 export async function generateService(config: Config, tree: FileTree, options: IGenerateServiceOptions) {
   const [serviceNameFilePath, serviceNameEnum] = config.sora.serviceNameEnum.split('#');
@@ -172,4 +178,38 @@ export async function generateDatabase(config: Config, tree: FileTree, options: 
     comFileAST.addImport(databaseName, importPath);
     comFileAST.addDatabase(comName, componentNameKey, databaseName);
   }
+}
+
+export async function buildAPIDeclare(config: Config, tree: FileTree) {
+  const handlerFiles = tree.readDir(config.sora.handlerDir, false);
+  const databaseFiles = tree.readDir(config.sora.databaseDir, false);
+
+  const handlerDeclareFiles = handlerFiles.filter(file => path.extname(file.absolutePath) === '.ts').map(file => {
+    return file.absolutePath;
+  });
+
+  const databaseDeclareFiles = databaseFiles.filter(file => path.extname(file.absolutePath) === '.ts').map(file => {
+    return file.absolutePath;
+  });
+
+  const [serviceNameFilePath, serviceNameEnumName] = config.sora.serviceNameEnum.split('#');
+  const serviceNameFileExtPath = serviceNameFilePath + '.ts';
+  const serviceNameFile = tree.getFile(serviceNameFileExtPath) as ScriptFileNode;
+
+  const [userErrorCodeFilePath, userErrorCodeEnumName] = config.sora.userErrorCodeEnum.split('#');
+  const userErrorCodeFileExtPath = userErrorCodeFilePath + '.ts';
+  const userErrorCodeFile = tree.getFile(userErrorCodeFileExtPath) as ScriptFileNode;
+
+  const morph = new Morph({});
+  morph.addDatabaseSourceFiles(databaseDeclareFiles);
+  morph.addHandlerSourceFiles(handlerDeclareFiles);
+  morph.addServiceNameSourceFile(serviceNameFile.absolutePath, serviceNameEnumName);
+  morph.addUserErrorCodeSourceFile(userErrorCodeFile.absolutePath, userErrorCodeEnumName);
+  morph.analysisServiceNameEnum();
+  morph.analysisUserErrorCodeEnum();
+  morph.analysisDatabaseClass();
+  morph.analysisRouteClass();
+
+  const distFile = tree.newFile(config.sora.apiDeclarationOutput) as ScriptFileNode;
+  distFile.setContent(morph.generateDistFile());
 }

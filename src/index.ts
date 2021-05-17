@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import {Command} from 'commander';
 import {FileTree} from './lib/fs/FileTree';
 import {Config} from './lib/Config';
-import {generateDatabase, generateHandler, generateService, generateWorker} from './lib/Command';
+import {buildAPIDeclare, generateDatabase, generateHandler, generateService, generateWorker} from './lib/Command';
 import pathModule = require('path');
 import inquirer = require('inquirer');
 import download = require('download-git-repo');
@@ -12,11 +12,24 @@ import fs = require('fs/promises');
 import chalk from 'chalk';
 const path = pathModule.posix;
 
+// tslint:disable-next-line
 const pkg = require('../package.json');
+// tslint:disable-next-line
 const log = console.log;
 
 const program = new Command();
 program.version(pkg.version);
+
+program.command('build:api-declare')
+  .action(async (options) => {
+    const config = new Config();
+    await config.load();
+    const fileTree = new FileTree(config.soraRoot);
+    await fileTree.load();
+
+    await buildAPIDeclare(config, fileTree);
+    await fileTree.commit();
+  })
 
 program.command('generate:service')
   .requiredOption('-n, --name <name>', 'Service name')

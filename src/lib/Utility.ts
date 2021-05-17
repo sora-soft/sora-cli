@@ -17,6 +17,11 @@ class Utility {
       return './' + result;
     return result;
   }
+
+  static exchangeExtname(filePath: string, ext: string) {
+    const base = path.basename(filePath).split('.').slice(0, -1).join('.');
+    return path.join(path.dirname(filePath), `${base}.${ext}`);
+  }
 }
 
 export {Utility};

@@ -13,7 +13,7 @@ class FileTree {
   }
 
   async load() {
-    await this.readDir(this.rootPath_);
+    await this.readDir_(this.rootPath_);
   }
 
   getFile(filePath: string, isAbsolute = false) {
@@ -40,6 +40,26 @@ class FileTree {
     this.deleteFiles_.add(file);
   }
 
+  readDir(subPath: string, recursion: boolean) {
+    const result: FileNode[] = [];
+    for (const [filePath, file] of this.fileMap_.entries()) {
+      if (filePath.indexOf(subPath) === 0) {
+        if (recursion) {
+          result.push(file);
+        } else {
+          if (path.dirname(filePath) === subPath) {
+            result.push(file);
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  getFileList() {
+    return [...this.fileMap_.entries()].map(([filePath, file]) => file.absolutePath);
+  }
+
   async commit() {
     for(const change of [...this.changes_]) {
       await change.save();
@@ -49,14 +69,14 @@ class FileTree {
     }
   }
 
-  private async readDir(folderPath: string) {
+  private async readDir_(folderPath: string) {
     const files = await fs.readdir(folderPath);
     for (const file of files) {
       const targetPath = path.join(folderPath, file);
       const subPath = path.relative(this.rootPath_, targetPath);
       const fileStat = await fs.stat(targetPath);
       if (fileStat.isDirectory()) {
-        await this.readDir(targetPath);
+        await this.readDir_(targetPath);
       }
       if (fileStat.isFile()) {
         const isScriptFile = ['.ts', '.json'].includes(path.extname(file));
