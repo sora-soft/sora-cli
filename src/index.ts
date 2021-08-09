@@ -8,7 +8,7 @@ import pathModule = require('path');
 import inquirer = require('inquirer');
 import download = require('download-git-repo');
 import ora = require('ora');
-import fs = require('fs/promises');
+import {promises as fs} from 'fs';
 import chalk from 'chalk';
 const path = pathModule.posix;
 

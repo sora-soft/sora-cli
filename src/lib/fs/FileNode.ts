@@ -1,4 +1,4 @@
-import fs = require('fs/promises');
+import {promises as fs} from 'fs';
 import mkdirp = require('mkdirp');
 import {FileTree} from './FileTree';
 import pathModule = require('path');

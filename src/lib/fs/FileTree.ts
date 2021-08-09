@@ -1,4 +1,4 @@
-import fs = require('fs/promises');
+import {promises as fs} from 'fs';
 import {FileNode} from './FileNode';
 import {ScriptFileNode} from './ScriptFileNode';
 import pathModule = require('path');

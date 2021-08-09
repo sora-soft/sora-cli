@@ -1,5 +1,5 @@
 import {FileNode} from './FileNode';
-import fs = require('fs/promises');
+import {promises as fs} from 'fs';
 import mkdirp = require('mkdirp');
 import pathModule = require('path');
 const path = pathModule.posix;
