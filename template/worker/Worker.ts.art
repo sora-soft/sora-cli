@@ -1,5 +1,6 @@
 import {IWorkerOptions, Node, Worker} from '@sora-soft/framework';
 import {<%- workerNameEnum %>} from '<%- workerNameWorkerRelativePath %>';
+import {AssertType} from 'typescript-is';
 
 export interface I<%- upperCamelCaseWorkerName %>WorkerOptions extends IWorkerOptions {
 }
@@ -11,7 +12,7 @@ class <%- upperCamelCaseWorkerName %>Worker extends Worker {
     });
   }
 
-  constructor(name: string, options: I<%- upperCamelCaseWorkerName %>WorkerOptions) {
+  constructor(name: string, @AssertType() options: I<%- upperCamelCaseWorkerName %>WorkerOptions) {
     super(name);
     this.options_ = options;
   }

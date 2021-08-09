@@ -1,6 +1,5 @@
 import {ClassDeclaration, Project, ProjectOptions, SourceFile, Node, InterfaceDeclaration, TypeNode, Type, Symbol, Decorator, TypeReferenceNode} from 'ts-morph';
 import * as ts from 'typescript';
-import * as tsutils from 'tsutils/typeguard';
 
 const LIB_PATH = 'node_modules/typescript'
 
@@ -77,7 +76,9 @@ class Morph {
       const classes = source.getClasses();
       for (const dataClass of classes) {
         const baseClass = dataClass.getBaseClass();
-        this.addType(baseClass.getType());
+        if (baseClass) {
+          this.addType(baseClass.getType());
+        }
         const newClass = this.distFile_.addClass({
           name: dataClass.getName(),
           hasDeclareKeyword: true,

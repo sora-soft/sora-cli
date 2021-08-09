@@ -10,6 +10,7 @@ import * as tsutils from 'tsutils/typeguard';
 import * as ts from 'typescript';
 import {DTS} from './DTS';
 import {Morph} from './Morph';
+import {TSFile} from './TSFile';
 
 interface IGenerateCommonOptions {
   dryRun?: boolean;
@@ -200,16 +201,24 @@ export async function buildAPIDeclare(config: Config, tree: FileTree) {
   const userErrorCodeFileExtPath = userErrorCodeFilePath + '.ts';
   const userErrorCodeFile = tree.getFile(userErrorCodeFileExtPath) as ScriptFileNode;
 
-  const morph = new Morph({});
-  morph.addDatabaseSourceFiles(databaseDeclareFiles);
-  morph.addHandlerSourceFiles(handlerDeclareFiles);
-  morph.addServiceNameSourceFile(serviceNameFile.absolutePath, serviceNameEnumName);
-  morph.addUserErrorCodeSourceFile(userErrorCodeFile.absolutePath, userErrorCodeEnumName);
-  morph.analysisServiceNameEnum();
-  morph.analysisUserErrorCodeEnum();
-  morph.analysisDatabaseClass();
-  morph.analysisRouteClass();
+  const tsFile = new TSFile({
+    compilerOptions: {
+      ...config.ts,
+      outDir: config.soraRoot,
+    },
+    skipAddingFilesFromTsConfig: true,
+  }, config.soraRoot);
+  tsFile.addDatabaseSourceFiles(databaseDeclareFiles);
+  tsFile.addHandlerSourceFiles(handlerDeclareFiles);
+  tsFile.addExtraSourceFiles([{
+    file: serviceNameFile.absolutePath,
+    exports: [serviceNameEnumName],
+  }, {
+    file: userErrorCodeFile.absolutePath,
+    exports: [userErrorCodeEnumName],
+  }])
 
+  tsFile.analysis();
   const distFile = tree.newFile(config.sora.apiDeclarationOutput) as ScriptFileNode;
-  distFile.setContent(morph.generateDistFile());
+  distFile.setContent(tsFile.generateDistFile());
 }

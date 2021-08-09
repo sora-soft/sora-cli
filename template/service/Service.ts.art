@@ -1,5 +1,6 @@
 import {IServiceOptions, Node, Service} from '@sora-soft/framework';
 import {<%- serviceNameEnum %>} from '<%- serviceNameServiceRelativePath %>';
+import {AssertType} from 'typescript-is';
 
 export interface I<%- upperCamelCaseServiceName %>Options extends IServiceOptions {
 }
@@ -11,7 +12,7 @@ class <%- upperCamelCaseServiceName %>Service extends Service {
     });
   }
 
-  constructor(name: string, options: I<%- upperCamelCaseServiceName %>Options) {
+  constructor(name: string, @AssertType() options: I<%- upperCamelCaseServiceName %>Options) {
     super(name, options);
     this.serviceOptions_ = options;
   }

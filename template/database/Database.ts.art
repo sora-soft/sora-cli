@@ -1,7 +1,9 @@
 import {Entity, PrimaryGeneratedColumn} from 'typeorm';
 import {BaseModel} from './base/Base';
 
-@Entity()
+@Entity({
+  engine: 'InnoDB default charset=utf8mb4 collate=utf8mb4_bin'
+})
 export class <%- databaseName %> extends BaseModel {
   @PrimaryGeneratedColumn('uuid')
   id: string;

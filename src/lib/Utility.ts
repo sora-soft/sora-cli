@@ -22,6 +22,10 @@ class Utility {
     const base = path.basename(filePath).split('.').slice(0, -1).join('.');
     return path.join(path.dirname(filePath), `${base}.${ext}`);
   }
+
+  static convertDTSFileToTSFile(filePath: string) {
+    return filePath.slice(0, 0 - '.d.ts'.length) + '.ts';
+  }
 }
 
 export {Utility};
