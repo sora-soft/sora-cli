@@ -1,5 +1,5 @@
 import path = require('path');
-import {ClassDeclaration, Decorator, EnumDeclaration, Expression, Node, Project, ProjectOptions, SourceFile, Symbol, ts, Type, TypeAliasDeclaration, VariableDeclaration, VariableStatement} from 'ts-morph';
+import {ClassDeclaration, Decorator, EnumDeclaration, Expression, IndentationText, Node, Project, ProjectOptions, QuoteKind, SourceFile, Symbol, ts, Type, TypeAliasDeclaration, VariableDeclaration, VariableStatement} from 'ts-morph';
 import {Utility} from './Utility';
 const LIB_PATH = 'node_modules/typescript'
 
@@ -10,8 +10,20 @@ export interface IExportInfo {
 
 class TSFile {
   constructor(options: ProjectOptions, srcRootDir: string) {
-    this.sourceProject_ = new Project(options);
-    this.dtsProject_ = new Project(options);
+    this.sourceProject_ = new Project({
+      ...options,
+      manipulationSettings: {
+        quoteKind: QuoteKind.Single,
+        indentationText: IndentationText.TwoSpaces,
+      }
+    });
+    this.dtsProject_ = new Project({
+      ...options,
+      manipulationSettings: {
+        quoteKind: QuoteKind.Single,
+        indentationText: IndentationText.TwoSpaces,
+      }
+    });
 
     this.fileExportMap_ = new Map();
 
@@ -146,6 +158,7 @@ class TSFile {
     this.cleanAllFileExport();
     this.dealNodeModuleImport();
     this.removeAllImport();
+    this.formatCode();
 
     let result = '';
     for (const [sourceFile] of this.fileExportMap_) {
@@ -155,6 +168,15 @@ class TSFile {
     }
 
     return Buffer.from(result);
+  }
+
+  formatCode() {
+    this.fileExportMap_.forEach((exports, source) => {
+      source.formatText({
+        tabSize: 2,
+        convertTabsToSpaces: true,
+      });
+    });
   }
 
   cleanAllFileUnused() {
