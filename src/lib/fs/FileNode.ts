@@ -1,8 +1,7 @@
 import {promises as fs} from 'fs';
 import mkdirp = require('mkdirp');
 import {FileTree} from './FileTree';
-import pathModule = require('path');
-const path = pathModule.posix;
+import path = require('path');
 
 class FileNode {
   constructor(subPath: string, tree: FileTree) {
@@ -13,7 +12,7 @@ class FileNode {
   async load() {
     if (this.content_)
       return;
-    this.content_ = this.raw_ = await fs.readFile(this.absolutePath);
+    this.content_ = this.raw_ = await fs.readFile(this.systemPath);
   }
 
   toString(encoding?: BufferEncoding) {
@@ -25,7 +24,11 @@ class FileNode {
   }
 
   get absolutePath() {
-    return pathModule.resolve(this.tree_.rootPath, this.subPath_);
+    return path.resolve(this.tree_.rootPath, this.subPath_).replace(/\\/g, '/');
+  }
+
+  get systemPath() {
+    return path.resolve(this.tree_.rootPath, this.subPath_);
   }
 
   setContent(content: Buffer) {
@@ -45,8 +48,8 @@ class FileNode {
   }
 
   async save() {
-    await mkdirp(path.dirname(this.absolutePath));
-    await fs.writeFile(this.absolutePath, this.content_);
+    await mkdirp(path.dirname(this.systemPath));
+    await fs.writeFile(this.systemPath, this.content_);
   }
 
   protected tree_: FileTree;

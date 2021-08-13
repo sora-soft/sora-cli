@@ -2,7 +2,7 @@ import {FileNode} from './FileNode';
 import {promises as fs} from 'fs';
 import mkdirp = require('mkdirp');
 import pathModule = require('path');
-const path = pathModule.posix;
+const path = pathModule;
 
 export interface IChange {
   start: number;

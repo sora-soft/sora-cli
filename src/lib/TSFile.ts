@@ -1,5 +1,5 @@
 import path = require('path');
-import {ClassDeclaration, Decorator, EnumDeclaration, Expression, FunctionDeclaration, InterfaceDeclaration, ModuleDeclaration, Node, Project, ProjectOptions, SourceFile, Symbol, ts, Type, TypeAliasDeclaration, TypeGuards, VariableDeclaration, VariableStatement} from 'ts-morph';
+import {ClassDeclaration, Decorator, EnumDeclaration, Expression, Node, Project, ProjectOptions, SourceFile, Symbol, ts, Type, TypeAliasDeclaration, VariableDeclaration, VariableStatement} from 'ts-morph';
 import {Utility} from './Utility';
 const LIB_PATH = 'node_modules/typescript'
 
@@ -55,7 +55,7 @@ class TSFile {
     for (const file of result.getFiles()) {
       const source = this.dtsProject_.createSourceFile(Utility.convertDTSFileToTSFile(file.filePath), file.text, {overwrite: true});
       if (extraFilePathList.includes(source.getFilePath())) {
-        this.sourceExportedMap_.set(source, this.exportInfoMap_.get(source.getFilePath()));
+        this.sourceExportedMap_.set(source, this.exportInfoMap_.get(source.getFilePath()) || []);
       }
 
       if (databaseFilePathList.includes(source.getFilePath())) {
@@ -142,17 +142,54 @@ class TSFile {
   generateDistFile() {
     this.loadAllFile();
     this.cleanAllFileExport();
+    this.cleanAllFileUnused();
+    this.cleanAllFileExport();
     this.dealNodeModuleImport();
     this.removeAllImport();
 
     let result = '';
     for (const [sourceFile] of this.fileExportMap_) {
       this.setExport(sourceFile);
-      result += '// ' + path.relative(this.sourceRoot_, sourceFile.getFilePath()) + '\n';
+      result += '// ' + path.relative(this.sourceRoot_, sourceFile.getFilePath()).replace(/\\/g, '/') + '\n';
       result += sourceFile.getFullText() + '\n';
     }
 
     return Buffer.from(result);
+  }
+
+  cleanAllFileUnused() {
+    this.fileExportMap_.forEach((exports, source) => {
+      const usedSymbol = new Set();
+      const usedSymbolIds = new Set<number>();
+      const exportsDeclarations = source.getExportedDeclarations();
+      exportsDeclarations.forEach((d) => {
+        d.forEach((de) => {
+          usedSymbol.add(de.getSymbol());
+          usedSymbolIds.add((de.getSymbol().compilerSymbol as any).id);
+          de.forEachDescendantAsArray().forEach(dec => {
+            const symbol = dec.getSymbol();
+            if (symbol) {
+              usedSymbol.add(symbol);
+              usedSymbolIds.add((symbol.compilerSymbol as any).id);
+            }
+          });
+        });
+      });
+
+      const removeStatement = [];
+      source.getStatements().forEach((s) => {
+        const symbol = s.getSymbol();
+        if (symbol) {
+          if (!usedSymbol.has(symbol.getExportSymbol())) {
+            removeStatement.push(s);
+          }
+        }
+      });
+
+      for (const statement of removeStatement) {
+        statement.remove();
+      }
+    })
   }
 
   removeAllImport() {
@@ -280,7 +317,6 @@ class TSFile {
     if (node.getSourceFile().getFilePath().includes(LIB_PATH))
       return;
 
-    // if (Node.isTypedNode(node) || Node.isIdentifier(node)) {
     if (Node.isTypedNode(node)) {
       const typeNode = node.getTypeNode();
       if (Node.isTypeReferenceNode(typeNode)) {
@@ -386,10 +422,7 @@ class TSFile {
           node.replaceWithText(type.getText());
         }
       }
-
     });
-
-
     source.addStatements(declaration.getText());
   }
 

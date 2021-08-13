@@ -10,7 +10,6 @@ import download = require('download-git-repo');
 import ora = require('ora');
 import {promises as fs} from 'fs';
 import chalk from 'chalk';
-const path = pathModule.posix;
 
 // tslint:disable-next-line
 const pkg = require('../package.json');

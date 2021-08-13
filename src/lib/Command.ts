@@ -4,12 +4,7 @@ import template = require('art-template');
 import {Utility} from './Utility';
 import {ScriptFileNode} from './fs/ScriptFileNode';
 import {AST} from './AST';
-import pathModule = require('path');
-const path = pathModule.posix;
-import * as tsutils from 'tsutils/typeguard';
-import * as ts from 'typescript';
-import {DTS} from './DTS';
-import {Morph} from './Morph';
+import path = require('path');
 import {TSFile} from './TSFile';
 
 interface IGenerateCommonOptions {
@@ -58,7 +53,7 @@ export async function generateService(config: Config, tree: FileTree, options: I
     serviceNameEnum,
   };
 
-  const result = template(pathModule.resolve(__dirname, '../../template/service/Service.ts.art'), data);
+  const result = template(path.resolve(__dirname, '../../template/service/Service.ts.art'), data);
   const serviceFile = tree.newFile(serviceFileExPath) as ScriptFileNode;
   serviceFile.setContent(result);
 
@@ -100,7 +95,7 @@ export async function generateWorker(config: Config, tree: FileTree, options: IG
     workerNameEnum,
   };
 
-  const result = template(pathModule.resolve(__dirname, '../../template/worker/Worker.ts.art'), data);
+  const result = template(path.resolve(__dirname, '../../template/worker/Worker.ts.art'), data);
   const workerFile = tree.newFile(workerFileExPath) as ScriptFileNode;
   workerFile.setContent(result);
 
@@ -131,7 +126,7 @@ export async function generateHandler(config: Config, tree: FileTree, options: I
   const data = {
     handlerName
   };
-  const result = template(pathModule.resolve(__dirname, '../../template/handler/Handler.ts.art'), data);
+  const result = template(path.resolve(__dirname, '../../template/handler/Handler.ts.art'), data);
   const handlerFile = tree.newFile(handlerFileExPath) as ScriptFileNode;
   handlerFile.setContent(result);
 }
@@ -148,7 +143,7 @@ export async function generateDatabase(config: Config, tree: FileTree, options: 
   const data = {
     databaseName,
   };
-  const result = template(pathModule.resolve(__dirname, '../../template/database/Database.ts.art'), data);
+  const result = template(path.resolve(__dirname, '../../template/database/Database.ts.art'), data);
   const handlerFile = tree.newFile(databaseFileExPath) as ScriptFileNode;
   handlerFile.setContent(result);
 
@@ -186,11 +181,11 @@ export async function buildAPIDeclare(config: Config, tree: FileTree) {
   const databaseFiles = tree.readDir(config.sora.databaseDir, false);
 
   const handlerDeclareFiles = handlerFiles.filter(file => path.extname(file.absolutePath) === '.ts').map(file => {
-    return file.absolutePath;
+    return file.systemPath;
   });
 
   const databaseDeclareFiles = databaseFiles.filter(file => path.extname(file.absolutePath) === '.ts').map(file => {
-    return file.absolutePath;
+    return file.systemPath;
   });
 
   const [serviceNameFilePath, serviceNameEnumName] = config.sora.serviceNameEnum.split('#');
