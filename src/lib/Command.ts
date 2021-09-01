@@ -28,6 +28,13 @@ interface IGenerateDatabaseOptions extends IGenerateCommonOptions {
   component?: string;
 }
 
+interface IBuildAPIDeclareOptions {
+  excludeHandler: string[];
+  includeHandler: string[];
+  excludeDatabase: string[];
+  includeDatabase: string[];
+}
+
 // interface IBuildAPIDeclare extends IGenerateCommonOptions {}
 
 export async function generateService(config: Config, tree: FileTree, options: IGenerateServiceOptions) {
@@ -176,15 +183,34 @@ export async function generateDatabase(config: Config, tree: FileTree, options: 
   }
 }
 
-export async function buildAPIDeclare(config: Config, tree: FileTree) {
+export async function buildAPIDeclare(config: Config, tree: FileTree, options: IBuildAPIDeclareOptions) {
   const handlerFiles = tree.readDir(config.sora.handlerDir, false);
   const databaseFiles = tree.readDir(config.sora.databaseDir, false);
-
-  const handlerDeclareFiles = handlerFiles.filter(file => path.extname(file.absolutePath) === '.ts').map(file => {
+  const handlerDeclareFiles = handlerFiles.filter(file => path.extname(file.absolutePath) === '.ts').filter(file => {
+    let shouldInclude = true;
+    const name = path.basename(file.absolutePath, '.ts');
+    if (options.includeHandler && options.includeHandler.length) {
+      shouldInclude = options.includeHandler.includes(name) && shouldInclude;
+    }
+    if (options.excludeHandler && options.excludeHandler.length) {
+      shouldInclude = !options.excludeHandler.includes(name) && shouldInclude;
+    }
+    return shouldInclude;
+  }).map(file => {
     return file.systemPath;
   });
 
-  const databaseDeclareFiles = databaseFiles.filter(file => path.extname(file.absolutePath) === '.ts').map(file => {
+  const databaseDeclareFiles = databaseFiles.filter(file => path.extname(file.absolutePath) === '.ts').filter(file => {
+    let shouldInclude = true;
+    const name = path.basename(file.absolutePath, '.ts');
+    if (options.includeDatabase && options.includeDatabase.length) {
+      shouldInclude = options.includeDatabase.includes(name) && shouldInclude;
+    }
+    if (options.excludeDatabase && options.excludeDatabase.length) {
+      shouldInclude = !options.excludeDatabase.includes(name) && shouldInclude;
+    }
+    return shouldInclude;
+  }).map(file => {
     return file.systemPath;
   });
 

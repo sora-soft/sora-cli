@@ -20,13 +20,17 @@ const program = new Command();
 program.version(pkg.version);
 
 program.command('build:api-declare')
+  .option('-eh, --exclude-handler <excludeHandler...>')
+  .option('-ih, --include-handler <includeHandler...>')
+  .option('-ed, --exclude-database <excludeDatabase...>')
+  .option('-id, --include-database <includeDatabase...>')
   .action(async (options) => {
     const config = new Config();
     await config.load();
     const fileTree = new FileTree(config.soraRoot);
     await fileTree.load();
 
-    await buildAPIDeclare(config, fileTree);
+    await buildAPIDeclare(config, fileTree, options);
     await fileTree.commit();
   })
 
