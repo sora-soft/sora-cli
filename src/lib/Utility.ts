@@ -1,6 +1,5 @@
 import camelcase = require('camelcase');
-import pathModule = require('path');
-const path = pathModule.posix;
+import path = require('path');
 
 class Utility {
   static camelize(str: string, upper = false) {
@@ -13,9 +12,9 @@ class Utility {
 
   static resolveImportPath(fromFilePath: string, target: string) {
     const result = path.relative(path.dirname(fromFilePath), target);
-    if (result[0] != '.')
-      return './' + result;
-    return result;
+    if (!result.startsWith('.'))
+      return './' + result.replace(/\\/g, '/');
+    return result.replace(/\\/g, '/');
   }
 
   static exchangeExtname(filePath: string, ext: string) {
