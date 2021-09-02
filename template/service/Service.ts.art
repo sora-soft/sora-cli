@@ -1,10 +1,11 @@
 import {IServiceOptions, Node, Service} from '@sora-soft/framework';
 import {<%- serviceNameEnum %>} from '<%- serviceNameServiceRelativePath %>';
-import {AssertType} from 'typescript-is';
+import {AssertType, ValidateClass} from 'typescript-is';
 
 export interface I<%- upperCamelCaseServiceName %>Options extends IServiceOptions {
 }
 
+@ValidateClass()
 class <%- upperCamelCaseServiceName %>Service extends Service {
   static register() {
     Node.registerService(<%- serviceNameEnum %>.<%- upperCamelCaseServiceName %>, (options: I<%- upperCamelCaseServiceName %>Options) => {
