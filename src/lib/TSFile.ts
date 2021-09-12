@@ -151,6 +151,20 @@ class TSFile {
     });
   }
 
+  setAllExport() {
+    for (const [sourceFile] of this.fileExportMap_) {
+      sourceFile.forEachChildAsArray().forEach((node) => {
+        if (Node.isExportableNode(node)) {
+          node.setIsExported(true);
+        }
+      });
+
+      sourceFile.getExportDeclarations().forEach((declaration) => {
+        declaration.remove();
+      });
+    }
+  }
+
   generateDistFile() {
     this.loadAllFile();
     this.cleanAllFileExport();
@@ -158,6 +172,7 @@ class TSFile {
     this.cleanAllFileExport();
     this.dealNodeModuleImport();
     this.removeAllImport();
+    this.setAllExport();
     this.formatCode();
 
     let result = '';
