@@ -1,5 +1,5 @@
 import path = require('path');
-import {ClassDeclaration, Decorator, EnumDeclaration, Expression, IndentationText, Node, Project, ProjectOptions, QuoteKind, SourceFile, Symbol, ts, Type, TypeAliasDeclaration, VariableDeclaration, VariableStatement} from 'ts-morph';
+import {ClassDeclaration, Decorator, EnumDeclaration, ExportedDeclarations, Expression, IndentationText, Node, Project, ProjectOptions, QuoteKind, SourceFile, Symbol, ts, Type, TypeAliasDeclaration, VariableDeclaration, VariableStatement} from 'ts-morph';
 import {Utility} from './Utility';
 const LIB_PATH = 'node_modules/typescript'
 
@@ -194,22 +194,44 @@ class TSFile {
     });
   }
 
+  addUsedSymbol(de: Node<ts.Node>, usedSymbol: Set<any>, usedSymbolIds: Set<number>, iter: Set<any>, filePath: string) {
+    const deSymbol = de.getSymbol();
+    if (deSymbol) {
+      usedSymbol.add(deSymbol);
+      usedSymbolIds.add((deSymbol.compilerSymbol as any).id);
+    }
+    de.forEachDescendantAsArray().forEach(dec => {
+      const symbol = dec.getSymbol();
+      if (symbol) {
+        usedSymbol.add(symbol);
+        usedSymbolIds.add((symbol.compilerSymbol as any).id);
+        symbol.getDeclarations().forEach(sd => {
+          if (sd.getSourceFile().getFilePath() === filePath) {
+            if (!iter.has(sd)) {
+              iter.add(sd);
+              this.addUsedSymbol(sd, usedSymbol, usedSymbolIds, iter, filePath);
+            }
+          }
+        })
+      }
+      this.addUsedSymbol(dec, usedSymbol, usedSymbolIds, iter, filePath);
+    });
+  }
+
   cleanAllFileUnused() {
     this.fileExportMap_.forEach((exports, source) => {
       const usedSymbol = new Set();
       const usedSymbolIds = new Set<number>();
+      const iter = new Set();
       const exportsDeclarations = source.getExportedDeclarations();
+
       exportsDeclarations.forEach((d) => {
         d.forEach((de) => {
-          usedSymbol.add(de.getSymbol());
-          usedSymbolIds.add((de.getSymbol().compilerSymbol as any).id);
-          de.forEachDescendantAsArray().forEach(dec => {
-            const symbol = dec.getSymbol();
-            if (symbol) {
-              usedSymbol.add(symbol);
-              usedSymbolIds.add((symbol.compilerSymbol as any).id);
-            }
-          });
+          if (source.getFilePath().includes('ChartType.ts')) {
+            this.addUsedSymbol(de, usedSymbol, usedSymbolIds, iter, source.getFilePath());
+          } else {
+            this.addUsedSymbol(de, usedSymbol, usedSymbolIds, iter, source.getFilePath());
+          }
         });
       });
 

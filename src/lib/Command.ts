@@ -25,6 +25,7 @@ interface IGenerateWorkerOptions extends IGenerateCommonOptions {
 
 interface IGenerateDatabaseOptions extends IGenerateCommonOptions {
   name: string;
+  file: string;
   component?: string;
 }
 
@@ -140,19 +141,28 @@ export async function generateHandler(config: Config, tree: FileTree, options: I
 
 export async function generateDatabase(config: Config, tree: FileTree, options: IGenerateDatabaseOptions) {
   const databaseName = Utility.camelize(options.name, true);
-  const databaseFilePath = path.join(config.sora.databaseDir, databaseName);
+  const fileName = Utility.camelize(options.file, true);
+  const databaseFilePath = path.join(config.sora.databaseDir, fileName);
   const databaseFileExPath = databaseFilePath + '.ts';
-
   const exitedFile = tree.getFile(databaseFileExPath);
-  if (exitedFile)
-    throw new Error('Database file exited');
-
   const data = {
     databaseName,
   };
-  const result = template(path.resolve(__dirname, '../../template/database/Database.ts.art'), data);
-  const handlerFile = tree.newFile(databaseFileExPath) as ScriptFileNode;
-  handlerFile.setContent(result);
+  if (exitedFile) {
+    const result = template(path.resolve(__dirname, '../../template/database/ExtendDatabase.ts.art'), data);
+    const databaseFile = exitedFile as ScriptFileNode;
+    await databaseFile.load();
+    let content = exitedFile.getContent();
+    if (!content.endsWith(databaseFile.lineSequence))
+      content += databaseFile.lineSequence;
+    content += databaseFile.lineSequence;
+    databaseFile.setContent(Buffer.from(content + result + databaseFile.lineSequence));
+    tree.addFile(databaseFile);
+  } else {
+    const result = template(path.resolve(__dirname, '../../template/database/Database.ts.art'), data);
+    const databaseFile = tree.newFile(databaseFileExPath) as ScriptFileNode;
+    databaseFile.setContent(result);
+  }
 
   // 注入组件
   if (options.component) {

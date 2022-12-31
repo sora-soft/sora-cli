@@ -88,7 +88,8 @@ program.command('generate:worker')
   })
 
 program.command('generate:database')
-  .requiredOption('-n, --name <name>', 'Database name')
+  .requiredOption('-n, --name <name>', 'Table name')
+  .requiredOption('-f, --file <file-name>', 'File name')
   .option('-d, --dry-run')
   .option('-c, --component <component>')
   .action(async (options) => {

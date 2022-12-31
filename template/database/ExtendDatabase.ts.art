@@ -1,5 +1,3 @@
-import {Entity} from '@sora-soft/database-component';
-
 @Entity()
 export class <%- databaseName %> {
   constructor(data?: Partial<<%- databaseName %>>) {

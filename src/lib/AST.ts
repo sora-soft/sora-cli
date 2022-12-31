@@ -47,8 +47,8 @@ class AST {
           const isImported = importElements.some(v => v.name.escapedText === importName);
           if (!isImported) {
             this.file_.modify({
-              start: importElements.length ? importElements[importElements.length - 1].pos : importElements.pos,
-              end: importElements.length ? importElements[importElements.length - 1].pos : importElements.pos,
+              start: importElements.length ? importElements[importElements.length - 1].end : importElements.end,
+              end: importElements.length ? importElements[importElements.length - 1].end : importElements.end,
               content: `${importElements.length ? ',' : ''} ${importName}`,
             });
             return;
@@ -124,10 +124,20 @@ class AST {
           const firstArgument = initializer.arguments[0];
           if (firstArgument.kind === ts.SyntaxKind.PropertyAccessExpression && (firstArgument as ts.PropertyAccessExpression).name.escapedText === componentNameKey) {
             const arrayArguments = initializer.arguments[1] as ts.ArrayLiteralExpression;
+
+            let lastEnd = false;
+            let lastSpace = false;
+            if (arrayArguments.elements.length) {
+              const lastMember = arrayArguments.elements[arrayArguments.elements.length - 1];
+              const afterLastMember = this.file_.getContent().substring(lastMember.end, arrayArguments.elements.end);
+              lastEnd = afterLastMember.includes(',');
+              if (afterLastMember.endsWith(' '))
+                lastSpace = true;
+            }
             this.file_.modify({
               start: arrayArguments.elements.end,
               end: arrayArguments.elements.end,
-              content: `${arrayArguments.elements.length ? ', ' : ''}${databaseName}`
+              content: `${lastEnd ? lastSpace ? '' : ' ' : ', '}${databaseName}`
             });
           }
         }
