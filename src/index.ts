@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import {Command} from 'commander';
 import {FileTree} from './lib/fs/FileTree';
 import {Config} from './lib/Config';
-import {buildAPIDeclare, generateDatabase, generateHandler, generateService, generateWorker} from './lib/Command';
+import {buildAPIDeclare, generateConfigFile, generateDatabase, generateHandler, generateService, generateWorker} from './lib/Command';
 import pathModule = require('path');
 import inquirer = require('inquirer');
 import download = require('download-git-repo');
@@ -32,6 +32,13 @@ program.command('build:api-declare')
 
     await buildAPIDeclare(config, fileTree, options);
     await fileTree.commit();
+  })
+
+program.command('config')
+  .requiredOption('-t, --template <templateFile>', 'template-config-file')
+  .requiredOption('-d, --dist <distFile>', 'dist-file')
+  .action(async (options) => {
+    await generateConfigFile(options);
   })
 
 program.command('generate:service')
