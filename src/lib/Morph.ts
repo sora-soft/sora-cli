@@ -128,7 +128,7 @@ class Morph {
         return;
       }
 
-      if (Node.isTypeReferenceNode(node)) {
+      if (Node.isTypeReference(node)) {
         const type = node.getType();
         const symbol = type.getSymbol() || type.getAliasSymbol();
         if (!symbol) {
@@ -200,13 +200,13 @@ class Morph {
       return;
 
     // if (Node.isTypedNode(node) || Node.isIdentifier(node)) {
-    if (Node.isTypedNode(node)) {
+    if (Node.isTyped(node)) {
       const typeNode = node.getTypeNode();
-      if (Node.isTypeReferenceNode(typeNode)) {
+      if (Node.isTypeReference(typeNode)) {
         const type = node.getType();
         this.addType(type);
       }
-    } else if (Node.isTypeReferenceNode(node)) {
+    } else if (Node.isTypeReference(node)) {
       const type = node.getType();
       this.addType(type);
     } else if (Node.isHeritageClause(node)) {
@@ -215,7 +215,7 @@ class Morph {
         const type = typeNode.getType();
         this.addType(type);
       }
-    } else if (Node.isReturnTypedNode(node)) {
+    } else if (Node.isReturnTyped(node)) {
       const type = node.getReturnType();
       this.addType(type);
     }

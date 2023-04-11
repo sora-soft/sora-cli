@@ -1,5 +1,6 @@
 import camelcase = require('camelcase');
 import path = require('path');
+import {ClassDeclaration} from 'ts-morph';
 
 class Utility {
   static camelize(str: string, upper = false) {
@@ -27,4 +28,24 @@ class Utility {
   }
 }
 
-export {Utility};
+class TSUtility {
+  static getClassRootClass(classDeclaration: ClassDeclaration) {
+    // console.log(classDeclaration.getExtends().getText());
+    let result = classDeclaration;
+    while(result.getExtends()) {
+      result = result.getBaseClass();
+    }
+
+    return result;
+    // let result = classDeclaration;
+    // while(result.getExtends()) {
+    //   // console.log(result.getBaseClass().getText());
+    //   const extend = result.getExtends();
+    //   extend.
+
+    // }
+    // return result;
+  }
+}
+
+export {Utility, TSUtility};

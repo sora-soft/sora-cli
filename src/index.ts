@@ -8,8 +8,12 @@ import pathModule = require('path');
 import inquirer = require('inquirer');
 import download = require('download-git-repo');
 import ora = require('ora');
-import {promises as fs} from 'fs';
 import chalk from 'chalk';
+import path = require('path');
+import git = require('isomorphic-git');
+import http = require('isomorphic-git/http/node');
+import fs = require('fs/promises');
+import oFS = require('fs');
 
 // tslint:disable-next-line
 const pkg = require('../package.json');
@@ -163,14 +167,15 @@ program.command('new <name>')
     }
 
     const loading = ora('Downloading').start();
-    await new Promise<void>((resolve, reject) => {
-      download('sora-soft/example-project', name, (err) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve();
-      });
+    const dir = path.join(process.cwd(), name)
+    await git.clone({
+      fs: oFS,
+      http,
+      dir,
+      url: 'https://github.com/sora-soft/backend-example-project.git',
+      singleBranch: true,
+      remote: 'upstream',
+      depth: 1,
     });
 
     loading.stop();

@@ -9,6 +9,7 @@ import {TSFile} from './TSFile';
 import fs = require('fs/promises');
 import inquirer = require('inquirer');
 import os = require('os');
+import {DTSProject} from './DTSFile';
 
 interface IGenerateCommonOptions {
   dryRun?: boolean;
@@ -133,7 +134,7 @@ export async function generateConfigFile(options: IGenerateConfigFile) {
     }, {
       test: /\#define\(([\w\W]*?)\)(\S*?)[\r\n]/,
       use: function(match, code) {
-        const [key, type, ...hint] = match.slice(8, -1).split(',');
+        const [key, type, ...hint] = match.slice(8, match.lastIndexOf(')')).split(',');
         vars.push({key: key.trim(), type: type.trim(), hint: hint.join(',').trim()});
         return {
           code: '',
@@ -344,7 +345,7 @@ export async function buildAPIDeclare(config: Config, tree: FileTree, options: I
   const userErrorCodeFileExtPath = userErrorCodeFilePath + '.ts';
   const userErrorCodeFile = tree.getFile(userErrorCodeFileExtPath) as ScriptFileNode;
 
-  const tsFile = new TSFile({
+  const tsFile = new DTSProject({
     compilerOptions: {
       ...config.ts,
       outDir: config.soraRoot,
@@ -353,7 +354,7 @@ export async function buildAPIDeclare(config: Config, tree: FileTree, options: I
   }, config.soraRoot);
   tsFile.addDatabaseSourceFiles(databaseDeclareFiles);
   tsFile.addHandlerSourceFiles(handlerDeclareFiles);
-  tsFile.addExtraSourceFiles([{
+  tsFile.addExtraEnumFiles([{
     file: serviceNameFile.absolutePath,
     exports: [serviceNameEnumName],
   }, {
@@ -361,7 +362,7 @@ export async function buildAPIDeclare(config: Config, tree: FileTree, options: I
     exports: [userErrorCodeEnumName],
   }])
 
-  tsFile.analysis();
+  // tsFile.analysis();
   const distFile = tree.newFile(config.sora.apiDeclarationOutput) as ScriptFileNode;
-  distFile.setContent(tsFile.generateDistFile());
+  distFile.setContent(Buffer.from(tsFile.generateDeclartionFile()));
 }

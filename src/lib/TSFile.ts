@@ -1,5 +1,5 @@
 import path = require('path');
-import {ClassDeclaration, Decorator, EnumDeclaration, ExportedDeclarations, Expression, IndentationText, Node, Project, ProjectOptions, QuoteKind, SourceFile, Symbol, ts, Type, TypeAliasDeclaration, VariableDeclaration, VariableStatement} from 'ts-morph';
+import {ClassDeclaration, Decorator, EnumDeclaration, Expression, IndentationText, Node, Project, ProjectOptions, QuoteKind, SourceFile, Symbol, ts, Type, TypeAliasDeclaration, VariableDeclaration, VariableStatement} from 'ts-morph';
 import {Utility} from './Utility';
 const LIB_PATH = 'node_modules/typescript'
 
@@ -154,7 +154,7 @@ class TSFile {
   setAllExport() {
     for (const [sourceFile] of this.fileExportMap_) {
       sourceFile.forEachChildAsArray().forEach((node) => {
-        if (Node.isExportableNode(node)) {
+        if (Node.isExportable(node)) {
           node.setIsExported(true);
         }
       });
@@ -376,13 +376,13 @@ class TSFile {
     if (node.getSourceFile().getFilePath().includes(LIB_PATH))
       return;
 
-    if (Node.isTypedNode(node)) {
+    if (Node.isTyped(node)) {
       const typeNode = node.getTypeNode();
-      if (Node.isTypeReferenceNode(typeNode)) {
+      if (Node.isTypeReference(typeNode)) {
         const type = node.getType();
         this.addType(type, source);
       }
-    } else if (Node.isTypeReferenceNode(node)) {
+    } else if (Node.isTypeReference(node)) {
       const type = node.getType();
       this.addType(type, source);
     } else if (Node.isHeritageClause(node)) {
@@ -391,7 +391,7 @@ class TSFile {
         const type = typeNode.getType();
         this.addType(type, source);
       }
-    } else if (Node.isReturnTypedNode(node)) {
+    } else if (Node.isReturnTyped(node)) {
       const type = node.getReturnType();
       this.addType(type, source);
     }
@@ -474,7 +474,7 @@ class TSFile {
         return;
       }
 
-      if (Node.isTypeReferenceNode(node)) {
+      if (Node.isTypeReference(node)) {
         const type = node.getType();
         const symbol = type.getSymbol() || type.getAliasSymbol();
         if (!symbol) {
