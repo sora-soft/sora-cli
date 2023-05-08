@@ -345,6 +345,20 @@ export async function buildAPIDeclare(config: Config, tree: FileTree, options: I
   const userErrorCodeFileExtPath = userErrorCodeFilePath + '.ts';
   const userErrorCodeFile = tree.getFile(userErrorCodeFileExtPath) as ScriptFileNode;
 
+  let customEnumList = [];
+  if (config.sora.customEnum) {
+    for (const enumPath of config.sora.customEnum) {
+      const [filePath, enumName] = enumPath.split('#');
+      const codeFileExtPath = filePath + '.ts';
+      const codeFile = tree.getFile(codeFileExtPath) as ScriptFileNode;
+
+      customEnumList.push({
+        file: codeFile.absolutePath,
+        exports: [enumName],
+      });
+    }
+  }
+
   const tsFile = new DTSProject({
     compilerOptions: {
       ...config.ts,
@@ -360,7 +374,10 @@ export async function buildAPIDeclare(config: Config, tree: FileTree, options: I
   }, {
     file: userErrorCodeFile.absolutePath,
     exports: [userErrorCodeEnumName],
-  }])
+  }]);
+  if (customEnumList.length) {
+    tsFile.addExtraEnumFiles(customEnumList);
+  }
 
   // tsFile.analysis();
   const distFile = tree.newFile(config.sora.apiDeclarationOutput) as ScriptFileNode;

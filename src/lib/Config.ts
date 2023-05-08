@@ -16,6 +16,7 @@ interface ISoraConfig {
   comClass: string;
   apiDeclarationOutput: string;
   userErrorCodeEnum: string;
+  customEnum?: string[];
 }
 
 interface ICliConfig {
