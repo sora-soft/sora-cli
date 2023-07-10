@@ -320,7 +320,7 @@ export async function buildAPIDeclare(config: Config, tree: FileTree, options: I
     }
     return shouldInclude;
   }).map(file => {
-    return file.systemPath;
+    return file.absolutePath;
   });
 
   const databaseDeclareFiles = databaseFiles.filter(file => path.extname(file.absolutePath) === '.ts').filter(file => {
@@ -334,7 +334,7 @@ export async function buildAPIDeclare(config: Config, tree: FileTree, options: I
     }
     return shouldInclude;
   }).map(file => {
-    return file.systemPath;
+    return file.absolutePath;
   });
 
   const [serviceNameFilePath, serviceNameEnumName] = config.sora.serviceNameEnum.split('#');

@@ -51,7 +51,7 @@ class DTSProject {
     const handlerSources = this.dtsProject_.getSourceFiles(this.handlerFiles_);
     const databaseSources = this.dtsProject_.getSourceFiles(this.databaseFiles_);
 
-    const databaseClasses = [];
+    const databaseClasses: ClassDeclaration[] = [];
     for (const source of databaseSources) {
       const classes = source.getClasses();
       for (const databaseClass of classes) {

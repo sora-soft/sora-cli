@@ -17,7 +17,6 @@
   "author": "yaya",
   "license": "WTFPL",
   "dependencies": {
-    "@angular-devkit/core": "^11.2.6",
     "art-template": "^4.13.2",
     "camelcase": "^6.2.0",
     "chalk": "^2.4.2",
