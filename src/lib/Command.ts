@@ -17,6 +17,7 @@ interface IGenerateCommonOptions {
 
 interface IGenerateServiceOptions extends IGenerateCommonOptions {
   name: string;
+  handlerFilePath: string;
 }
 
 interface IGenerateRouteOptions extends IGenerateCommonOptions {
@@ -161,17 +162,20 @@ export async function generateService(config: Config, tree: FileTree, options: I
   const upperCamelCaseServiceFullName = `${upperCamelCaseServiceName}Service`;
   const [serviceRegisterFilePath, registerMethodPath] = config.sora.serviceRegister.split('#');
   const [serviceRegisterClass, serviceRegisterMethod] = registerMethodPath.split('.');
+  const handlerRelativePath = Utility.resolveImportPath(serviceFileExPath, options.handlerFilePath);
 
   const exitedFile = tree.getFile(serviceFileExPath);
   if (exitedFile)
     throw new Error('Service file exited');
 
   const data = {
+    serviceName: Utility.camelize(options.name, false),
     upperCamelCaseServiceName,
     serviceNameFilePath,
     serviceFileExPath,
     serviceNameServiceRelativePath,
     serviceNameEnum,
+    handlerRelativePath
   };
 
   const result = template(path.resolve(__dirname, '../../template/service/Service.ts.art'), data);
@@ -189,7 +193,7 @@ export async function generateService(config: Config, tree: FileTree, options: I
   const serviceRegisterServiceRelativePath = Utility.resolveImportPath(serviceRegisterFilePath, serviceFilePath);
   await serviceRegisterFile.load();
   const serviceRegisterAST = new AST(serviceRegisterFile);
-  serviceRegisterAST.addImport(upperCamelCaseServiceFullName, serviceRegisterServiceRelativePath, false);
+  serviceRegisterAST.addImport(upperCamelCaseServiceFullName, serviceRegisterServiceRelativePath + '.js', false);
   serviceRegisterAST.insertCodeInClassMethod(serviceRegisterClass, serviceRegisterMethod, `\n    ${upperCamelCaseServiceFullName}.register();`);
 }
 
@@ -250,6 +254,7 @@ export async function generateHandler(config: Config, tree: FileTree, options: I
   const result = template(path.resolve(__dirname, '../../template/handler/Handler.ts.art'), data);
   const handlerFile = tree.newFile(handlerFileExPath) as ScriptFileNode;
   handlerFile.setContent(result);
+  return handlerFilePath;
 }
 
 export async function generateDatabase(config: Config, tree: FileTree, options: IGenerateDatabaseOptions) {

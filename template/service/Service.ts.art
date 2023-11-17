@@ -1,8 +1,10 @@
-import {IServiceOptions, Node, Service} from '@sora-soft/framework';
-import {<%- serviceNameEnum %>} from '<%- serviceNameServiceRelativePath %>';
-import {AssertType, ValidateClass} from 'typescript-is';
+import {IServiceOptions, Node, Service, ITCPListenerOptions, Context, Route, TCPListener} from '@sora-soft/framework';
+import {TypeGuard, ValidateClass} from '@sora-soft/type-guard';
+import {<%- serviceNameEnum %>} from '<%- serviceNameServiceRelativePath %>.js';
+import {<%- upperCamelCaseServiceName %>Handler} from '<%- handlerRelativePath %>.js';
 
 export interface I<%- upperCamelCaseServiceName %>Options extends IServiceOptions {
+  tcpListener: ITCPListenerOptions;
 }
 
 @ValidateClass()
@@ -13,16 +15,21 @@ class <%- upperCamelCaseServiceName %>Service extends Service {
     });
   }
 
-  constructor(name: string, @AssertType() options: I<%- upperCamelCaseServiceName %>Options) {
+  constructor(name: string, options: I<%- upperCamelCaseServiceName %>Options) {
     super(name, options);
-    this.serviceOptions_ = options;
+    TypeGuard.assert<I<%- upperCamelCaseServiceName %>Options>(options);
+    this.<%- serviceName %>Options_ = options;
   }
 
-  protected async startup() {}
+  protected async startup(ctx: Context) {
+    const route = new <%- upperCamelCaseServiceName %>Handler();
+    const listener = new TCPListener(this.<%- serviceName %>Options_.tcpListener, Route.callback(route));
+    await this.installListener(listener, ctx);
+  }
 
   protected async shutdown() {}
 
-  private serviceOptions_: I<%- upperCamelCaseServiceName %>Options;
+  private <%- serviceName %>Options_: I<%- upperCamelCaseServiceName %>Options;
 }
 
 export {<%- upperCamelCaseServiceName %>Service}

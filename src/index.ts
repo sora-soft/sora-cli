@@ -48,20 +48,19 @@ program.command('config')
 program.command('generate:service')
   .requiredOption('-n, --name <name>', 'Service name')
   .option('-d, --dry-run')
-  .option('-wh, --with-handler')
   .action(async (options) => {
     const config = new Config();
     await config.load();
     const fileTree = new FileTree(config.soraRoot);
     await fileTree.load();
-    await generateService(config, fileTree, options);
-
-    if (options.withHandler) {
-      await generateHandler(config, fileTree, {
-        name: options.name,
-        dryRun: options.dryRun,
-      })
-    }
+    const handlerFilePath = await generateHandler(config, fileTree, {
+      name: options.name,
+      dryRun: options.dryRun,
+    });
+    await generateService(config, fileTree, {
+      ...options,
+      handlerFilePath,
+    });
 
     if (!options.dryRun) {
       await fileTree.commit();

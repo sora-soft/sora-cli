@@ -1,6 +1,6 @@
 import {IWorkerOptions, Node, Worker} from '@sora-soft/framework';
-import {<%- workerNameEnum %>} from '<%- workerNameWorkerRelativePath %>';
-import {AssertType, ValidateClass} from 'typescript-is';
+import {TypeGuard, ValidateClass} from '@sora-soft/type-guard';
+import {<%- workerNameEnum %>} from '<%- workerNameWorkerRelativePath %>.js';
 
 export interface I<%- upperCamelCaseWorkerName %>WorkerOptions extends IWorkerOptions {
 }
